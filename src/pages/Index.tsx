@@ -1,13 +1,41 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import HeroSection from "@/components/sections/HeroSection";
+import ServicesSection from "@/components/sections/ServicesSection";
+import FeaturedProperties from "@/components/sections/FeaturedProperties";
+import StatsSection from "@/components/sections/StatsSection";
+import ProcessSection from "@/components/sections/ProcessSection";
+import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import CTASection from "@/components/sections/CTASection";
 
+/** Homepage — assembles all hero and marketing sections */
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <>
+      <HeroSection />
+      <ServicesSection />
+      <FeaturedProperties />
+      <StatsSection />
+      <ProcessSection />
+      <TestimonialsSection />
+      <CTASection />
+
+      {/* JSON-LD LocalBusiness */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateAgent",
+            name: "GANDA Immobilier",
+            telephone: "+22901549000805",
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: "Cotonou",
+              addressCountry: "BJ",
+            },
+          }),
+        }}
+      />
+    </>
   );
 };
 
