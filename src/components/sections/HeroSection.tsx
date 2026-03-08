@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { HERO } from "@/lib/constants";
+import heroBg from "@/assets/hero-bg.jpg";
 
 /** Hero section with gradient overlay, headline and CTAs */
 const HeroSection = () => {
