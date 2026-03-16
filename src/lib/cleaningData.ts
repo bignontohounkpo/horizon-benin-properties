@@ -157,6 +157,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "nettoyage-apres-travaux",
     icon: "HardHat",
     badge: "Sur devis",
+    image: imgTravaux,
     title: "Nettoyage après Travaux",
     heroTitle: "Nettoyage après Travaux à Cotonou",
     heroAccroche:
