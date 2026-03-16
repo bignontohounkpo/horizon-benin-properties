@@ -245,6 +245,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "entretien-regulier-abonnement",
     icon: "CalendarCheck",
     badge: "Forfait disponible",
+    image: imgEntretien,
     title: "Entretien Régulier & Abonnement",
     heroTitle: "Entretien Régulier — Abonnement Nettoyage",
     heroAccroche:
