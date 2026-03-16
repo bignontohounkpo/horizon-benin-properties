@@ -63,6 +63,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "nettoyage-bureaux-espaces-pro",
     icon: "Briefcase",
     badge: "Forfait disponible",
+    image: imgBureaux,
     title: "Bureaux & Espaces Professionnels",
     heroTitle: "Nettoyage de Bureaux & Espaces Professionnels",
     heroAccroche:
