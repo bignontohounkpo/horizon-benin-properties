@@ -40,6 +40,7 @@ export interface CleaningService {
   fullDescription: string;
   icon: string;
   badge: "Sur devis" | "Forfait disponible";
+  image: string;
   included: string[];
   steps: CleaningStep[];
   targetProfiles: CleaningProfile[];

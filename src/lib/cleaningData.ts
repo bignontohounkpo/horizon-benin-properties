@@ -2,6 +2,13 @@
 
 import type { CleaningService } from "@/types/cleaning";
 
+import imgMaison from "@/assets/cleaning/cleaning-maison.jpg";
+import imgBureaux from "@/assets/cleaning/cleaning-bureaux.jpg";
+import imgEcoles from "@/assets/cleaning/cleaning-ecoles.jpg";
+import imgTravaux from "@/assets/cleaning/cleaning-travaux.jpg";
+import imgEvenements from "@/assets/cleaning/cleaning-evenements.jpg";
+import imgEntretien from "@/assets/cleaning/cleaning-entretien.jpg";
+
 export const CLEANING_SERVICES: CleaningService[] = [
   /* ── 1. Maisons & Villas ──────────────────────── */
   {
@@ -9,6 +16,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "nettoyage-maison-villa",
     icon: "Home",
     badge: "Forfait disponible",
+    image: imgMaison,
     title: "Maisons & Villas",
     heroTitle: "Nettoyage de Maisons & Villas à Cotonou",
     heroAccroche:
@@ -55,6 +63,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "nettoyage-bureaux-espaces-pro",
     icon: "Briefcase",
     badge: "Forfait disponible",
+    image: imgBureaux,
     title: "Bureaux & Espaces Professionnels",
     heroTitle: "Nettoyage de Bureaux & Espaces Professionnels",
     heroAccroche:
@@ -101,6 +110,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "nettoyage-ecoles-etablissements",
     icon: "GraduationCap",
     badge: "Sur devis",
+    image: imgEcoles,
     title: "Écoles & Établissements Scolaires",
     heroTitle: "Nettoyage d'Écoles & Établissements Scolaires",
     heroAccroche:
@@ -147,6 +157,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "nettoyage-apres-travaux",
     icon: "HardHat",
     badge: "Sur devis",
+    image: imgTravaux,
     title: "Nettoyage après Travaux",
     heroTitle: "Nettoyage après Travaux à Cotonou",
     heroAccroche:
@@ -190,6 +201,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "nettoyage-evenements",
     icon: "PartyPopper",
     badge: "Sur devis",
+    image: imgEvenements,
     title: "Événements & Réceptions",
     heroTitle: "Nettoyage Événementiel à Cotonou",
     heroAccroche:
@@ -233,6 +245,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "entretien-regulier-abonnement",
     icon: "CalendarCheck",
     badge: "Forfait disponible",
+    image: imgEntretien,
     title: "Entretien Régulier & Abonnement",
     heroTitle: "Entretien Régulier — Abonnement Nettoyage",
     heroAccroche:

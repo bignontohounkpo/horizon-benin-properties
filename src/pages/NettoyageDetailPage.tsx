@@ -107,9 +107,19 @@ const NettoyageDetailPage = () => {
 
   return (
     <main className="min-h-screen">
-      {/* ── 1. Hero with breadcrumb ────────────── */}
-      <section className="bg-primary text-primary-foreground py-14 md:py-20">
-        <div className="container-custom max-w-4xl mx-auto">
+      {/* ── 1. Hero with breadcrumb + image ──── */}
+      <section className="relative overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src={service.image}
+            alt={service.heroTitle}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-primary/85" />
+        </div>
+
+        <div className="relative container-custom max-w-4xl mx-auto py-14 md:py-20 text-primary-foreground">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-primary-foreground/70 text-sm mb-6">
             <Link to="/" className="hover:text-primary-foreground transition-colors">Accueil</Link>
