@@ -110,6 +110,7 @@ export const CLEANING_SERVICES: CleaningService[] = [
     slug: "nettoyage-ecoles-etablissements",
     icon: "GraduationCap",
     badge: "Sur devis",
+    image: imgEcoles,
     title: "Écoles & Établissements Scolaires",
     heroTitle: "Nettoyage d'Écoles & Établissements Scolaires",
     heroAccroche:
