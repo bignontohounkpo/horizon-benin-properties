@@ -13,6 +13,8 @@ import LocationPage from "./pages/LocationPage";
 import VentePage from "./pages/VentePage";
 import ContactPage from "./pages/ContactPage";
 import ServicesPage from "./pages/ServicesPage";
+import NettoyagePage from "./pages/NettoyagePage";
+import NettoyageDetailPage from "./pages/NettoyageDetailPage";
 import MentionsLegalesPage from "./pages/MentionsLegalesPage";
 import NotFound from "./pages/NotFound";
 
