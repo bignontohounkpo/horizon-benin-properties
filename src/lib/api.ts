@@ -201,3 +201,30 @@ export async function fetchDistricts(): Promise<any[]> {
   if (!res.ok) throw new Error("Failed to fetch districts")
   return res.json()
 }
+
+/**
+ * Récupérer les villes et quartiers utilisés par les propriétés actives
+ */
+export async function fetchUsedLocations(offerType?: string): Promise<{ cities: string[], districts: { name: string, city: string }[] }> {
+  const params = new URLSearchParams()
+  if (offerType) params.set("offerType", offerType)
+  
+  const res = await fetch(`${BASE}/api/properties/used-locations?${params}`, {
+    next: { revalidate: 300 },
+  } as NextFetchRequestInit)
+
+  if (!res.ok) throw new Error("Failed to fetch used locations")
+  return res.json()
+}
+
+/**
+ * Récupérer tous les paramètres de l'agence
+ */
+export async function fetchSettings(): Promise<Record<string, string>> {
+  const res = await fetch(`${BASE}/api/settings`, {
+    next: { revalidate: 60 }, // Cache pour 1 minute
+  } as NextFetchRequestInit)
+
+  if (!res.ok) throw new Error("Failed to fetch settings")
+  return res.json()
+}

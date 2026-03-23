@@ -43,7 +43,6 @@ export async function GET(request: NextRequest) {
       if (!where.AND) where.AND = []
       where.AND.push(cityFilter)
     }
-    
     if (search) {
       const q = search.toLowerCase()
       const searchFilter = {

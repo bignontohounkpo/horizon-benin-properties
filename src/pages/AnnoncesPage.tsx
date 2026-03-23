@@ -3,8 +3,7 @@
 import { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { fetchPropertiesPaginated, fetchCategories, fetchDistricts } from "@/lib/api"
-import { DISTRICTS as STATIC_DISTRICTS } from "@/lib/constants"
+import { fetchPropertiesPaginated, fetchCategories, fetchUsedLocations } from "@/lib/api"
 import { useDebounce } from "@/hooks/useDebounce"
 import PropertyCard from "@/components/properties/PropertyCard"
 import type { OfferType, PropertyCategory, Property } from "@/types/property"
@@ -39,18 +38,28 @@ const AnnoncesPage = ({
   const [cities, setCities] = useState<string[]>([])
   const [selectedCity, setSelectedCity] = useState<string>("")
 
+  // New states for dynamic locations
+  const [availableCities, setAvailableCities] = useState<string[]>([])
+  const [availableDistricts, setAvailableDistricts] = useState<{name: string, city: string}[]>([])
+
   const search = searchParams?.get("search") ?? ""
   const debouncedSearch = useDebounce(search)
 
   // Use forced offer type from props, or from URL, or undefined
   const offerType = forcedOfferType || (searchParams?.get("offerType") as OfferType) || undefined
   const category = (searchParams?.get("category") as PropertyCategory) || undefined
-  const city = searchParams?.get("city") || ""
+  const city = searchParams?.get("city") || undefined
+  const district = searchParams?.get("district") || undefined
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams?.toString() ?? "")
     if (value) params.set(key, value)
     else params.delete(key)
+
+    // Reset district if city changes and it's not compatible
+    if (key === "city") {
+      params.delete("district")
+    }
 
     // Reset to page 1 when filters change
     params.delete("page")
@@ -67,24 +76,28 @@ const AnnoncesPage = ({
   useEffect(() => {
     async function loadFilters() {
       try {
-        const [cats, dists] = await Promise.all([
-          fetchCategories(),
-          fetchDistricts()
-        ])
+        const cats = await fetchCategories()
         setDynamicCategories(cats)
-        // Trier les quartiers par nom
-        const sortedDists = [...dists].sort((a: any, b: any) => a.name.localeCompare(b.name))
-        setDynamicDistricts(sortedDists.length > 0 ? sortedDists : [])
-        
-        // Extraire les villes uniques
-        const uniqueCities = Array.from(new Set(dists.map((d: any) => d.city))).sort() as string[]
-        setCities(uniqueCities)
       } catch (err) {
-        console.error("Error loading filters:", err)
+        console.error("Error loading categories:", err)
       }
     }
     loadFilters()
   }, [])
+
+  // Load available locations when offerType changes
+  useEffect(() => {
+    async function loadLocations() {
+      try {
+        const { cities, districts } = await fetchUsedLocations(offerType)
+        setAvailableCities(cities)
+        setAvailableDistricts(districts)
+      } catch (err) {
+        console.error("Error loading locations:", err)
+      }
+    }
+    loadLocations()
+  }, [offerType])
 
   // Charger les propriétés avec pagination
   useEffect(() => {
@@ -95,7 +108,8 @@ const AnnoncesPage = ({
         const data = await fetchPropertiesPaginated({
           offerType: forcedOfferType || offerType,
           category,
-          city: city || undefined,
+          city,
+          district,
           search: debouncedSearch,
           page: currentPage,
           pageSize: 12,
@@ -111,7 +125,13 @@ const AnnoncesPage = ({
       }
     }
     loadProperties()
-  }, [forcedOfferType, currentPage, category, city, debouncedSearch])
+  }, [forcedOfferType, currentPage, category, city, district, debouncedSearch])
+
+  // Computed districts based on selected city
+  const filteredDistricts = useMemo(() => {
+    if (!city) return availableDistricts
+    return availableDistricts.filter(d => d.city === city)
+  }, [availableDistricts, city])
 
 
 
@@ -134,7 +154,7 @@ const AnnoncesPage = ({
         </div>
 
         {/* Filters */}
-        <div className={`bg-card rounded-2xl shadow-card p-4 md:p-6 mb-8 gap-4 grid grid-cols-1 sm:grid-cols-2 ${hideOfferTypeFilter ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
+        <div className={`bg-card rounded-2xl shadow-card p-4 md:p-6 mb-8 gap-4 grid grid-cols-1 sm:grid-cols-2 ${hideOfferTypeFilter ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
           {/* Offer type */}
           {!hideOfferTypeFilter && (
             <select
@@ -155,33 +175,6 @@ const AnnoncesPage = ({
             </select>
           )}
 
-          {/* City */}
-          <select
-            value={city}
-            onChange={(e) => {
-              const val = e.target.value
-              const params = new URLSearchParams(searchParams?.toString() ?? "")
-              if (val) params.set("city", val)
-              else params.delete("city")
-              params.delete("district") // Reset district when city changes
-              params.delete("page")
-              router.push(`${basePath}?${params.toString()}`)
-            }}
-            className="w-full py-2.5 px-3 pr-10 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 0.75rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
-            aria-label="Ville"
-          >
-            <option value="">Toutes les villes</option>
-            {cities.map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-
           {/* Category */}
           <select
             value={category ?? ""}
@@ -200,8 +193,45 @@ const AnnoncesPage = ({
               <option key={cat.id} value={cat.slug}>{cat.name}</option>
             ))}
           </select>
-        </div>
 
+          {/* City */}
+          <select
+            value={city ?? ""}
+            onChange={(e) => updateFilter("city", e.target.value)}
+            className="w-full py-2.5 px-3 pr-10 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 0.75rem center',
+              backgroundSize: '1.5em 1.5em'
+            }}
+            aria-label="Commune"
+          >
+            <option value="">Toutes les communes</option>
+            {availableCities.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+
+          {/* District */}
+          <select
+            value={district ?? ""}
+            onChange={(e) => updateFilter("district", e.target.value)}
+            className="w-full py-2.5 px-3 pr-10 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 0.75rem center',
+              backgroundSize: '1.5em 1.5em'
+            }}
+            aria-label="Quartier"
+          >
+            <option value="">Tous les quartiers</option>
+            {filteredDistricts.map((d) => (
+              <option key={d.name} value={d.name}>{d.name}</option>
+            ))}
+          </select>
+        </div>
         {/* Results */}
         {loading ? (
           <div className="text-center py-16">
