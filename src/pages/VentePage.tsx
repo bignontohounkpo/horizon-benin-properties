@@ -1,25 +1,18 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect } from "react"
 import AnnoncesPage from "./AnnoncesPage"
 
 /** Vente page — Annonces page pre-filtered to "vendre" */
 const VentePage = () => {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    // Only redirect if type is not already set to "vendre"
-    if (searchParams?.get("type") !== "vendre") {
-      const params = new URLSearchParams(searchParams?.toString() ?? "")
-      params.set("type", "vendre")
-      router.replace(`/annonces?${params.toString()}`)
-    }
-  }, [searchParams, router])
-
-  // Show the AnnoncesPage directly (filters are in URL)
-  return <AnnoncesPage />
+  return (
+    <AnnoncesPage
+      forcedOfferType="vendre"
+      title="Biens à vendre"
+      description="Découvrez notre sélection de biens à vendre soigneusement vérifiés à Cotonou et au Bénin."
+      hideOfferTypeFilter
+      basePath="/vente"
+    />
+  )
 }
 
 export default VentePage

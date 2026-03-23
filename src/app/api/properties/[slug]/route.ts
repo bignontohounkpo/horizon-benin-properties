@@ -30,7 +30,7 @@ export async function GET(
 
     const property = {
       ...propertyRaw,
-      category: propertyRaw.categoryId || "",
+      category: propertyRaw.category?.slug || "",
       district: propertyRaw.district?.name || "",
       createdAt: propertyRaw.createdAt.toISOString(),
       updatedAt: propertyRaw.updatedAt.toISOString(),
@@ -51,19 +51,30 @@ export async function PUT(
   try {
     const { slug: id } = await params
     const body = await request.json()
-    const { category, district, coordinates, city, ...rest } = body
+    
+    // Nettoyer les données pour éviter les erreurs Prisma (champs inconnus ou immuables)
+    const { 
+      id: _id, 
+      createdAt: _c, 
+      updatedAt: _u, 
+      categoryId: _ci, 
+      districtId: _di, 
+      category, 
+      district, 
+      coordinates, 
+      city, 
+      ...cleanRest 
+    } = body
 
     const existing = await prisma.property.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
-    // Clean up undefined fields dynamically if needed, 
-    // Prisma will ignore undefined values but we make sure of explicit mappings
     const updated = await prisma.property.update({
       where: { id },
       data: {
-        ...rest,
+        ...cleanRest,
         lat: coordinates?.lat,
         lng: coordinates?.lng,
         city: city || "Cotonou",

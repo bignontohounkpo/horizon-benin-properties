@@ -25,6 +25,7 @@ export async function fetchPropertiesPaginated(filters?: {
   offerType?: "louer" | "vendre"
   category?: string
   district?: string
+  city?: string
   search?: string
   page?: number
   pageSize?: number
@@ -33,6 +34,7 @@ export async function fetchPropertiesPaginated(filters?: {
   if (filters?.offerType) params.set("offerType", filters.offerType)
   if (filters?.category) params.set("category", filters.category)
   if (filters?.district) params.set("district", filters.district)
+  if (filters?.city) params.set("city", filters.city)
   if (filters?.search) params.set("search", filters.search)
   if (filters?.page) params.set("page", String(filters.page))
   if (filters?.pageSize) params.set("pageSize", String(filters.pageSize))
@@ -187,5 +189,15 @@ export async function deleteCategory(id: string): Promise<{ success: boolean }> 
     method: "DELETE",
   })
   if (!res.ok) throw new Error("Failed to delete category")
+  return res.json()
+}
+/**
+ * ADMIN: Récupérer tous les quartiers
+ */
+export async function fetchDistricts(): Promise<any[]> {
+  const res = await fetch(`${BASE}/api/districts`, {
+    next: { revalidate: 60 },
+  } as NextFetchRequestInit)
+  if (!res.ok) throw new Error("Failed to fetch districts")
   return res.json()
 }

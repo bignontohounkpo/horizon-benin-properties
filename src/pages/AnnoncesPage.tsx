@@ -3,8 +3,8 @@
 import { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { fetchPropertiesPaginated } from "@/lib/api"
-import { CATEGORY_LABELS, DISTRICTS } from "@/lib/constants"
+import { fetchPropertiesPaginated, fetchCategories, fetchDistricts } from "@/lib/api"
+import { DISTRICTS as STATIC_DISTRICTS } from "@/lib/constants"
 import { useDebounce } from "@/hooks/useDebounce"
 import PropertyCard from "@/components/properties/PropertyCard"
 import type { OfferType, PropertyCategory, Property } from "@/types/property"
@@ -34,14 +34,18 @@ const AnnoncesPage = ({
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([])
+  const [dynamicDistricts, setDynamicDistricts] = useState<any[]>([])
+  const [cities, setCities] = useState<string[]>([])
+  const [selectedCity, setSelectedCity] = useState<string>("")
 
   const search = searchParams?.get("search") ?? ""
   const debouncedSearch = useDebounce(search)
 
   // Use forced offer type from props, or from URL, or undefined
-  const offerType = forcedOfferType || (searchParams?.get("type") as OfferType) || undefined
+  const offerType = forcedOfferType || (searchParams?.get("offerType") as OfferType) || undefined
   const category = (searchParams?.get("category") as PropertyCategory) || undefined
-  const district = searchParams?.get("district") || undefined
+  const city = searchParams?.get("city") || ""
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams?.toString() ?? "")
@@ -52,12 +56,35 @@ const AnnoncesPage = ({
     params.delete("page")
 
     // Add forced offer type to params if needed
-    if (forcedOfferType && key !== "type") {
-      params.set("type", forcedOfferType)
+    if (forcedOfferType && key !== "offerType") {
+      params.set("offerType", forcedOfferType)
     }
 
     router.push(`${basePath}?${params.toString()}`)
   }
+
+  // Charger les filtres initiaux
+  useEffect(() => {
+    async function loadFilters() {
+      try {
+        const [cats, dists] = await Promise.all([
+          fetchCategories(),
+          fetchDistricts()
+        ])
+        setDynamicCategories(cats)
+        // Trier les quartiers par nom
+        const sortedDists = [...dists].sort((a: any, b: any) => a.name.localeCompare(b.name))
+        setDynamicDistricts(sortedDists.length > 0 ? sortedDists : [])
+        
+        // Extraire les villes uniques
+        const uniqueCities = Array.from(new Set(dists.map((d: any) => d.city))).sort() as string[]
+        setCities(uniqueCities)
+      } catch (err) {
+        console.error("Error loading filters:", err)
+      }
+    }
+    loadFilters()
+  }, [])
 
   // Charger les propriétés avec pagination
   useEffect(() => {
@@ -66,9 +93,9 @@ const AnnoncesPage = ({
       setError(null)
       try {
         const data = await fetchPropertiesPaginated({
-          offerType: forcedOfferType,
+          offerType: forcedOfferType || offerType,
           category,
-          district,
+          city: city || undefined,
           search: debouncedSearch,
           page: currentPage,
           pageSize: 12,
@@ -84,7 +111,7 @@ const AnnoncesPage = ({
       }
     }
     loadProperties()
-  }, [forcedOfferType, currentPage, category, district, debouncedSearch])
+  }, [forcedOfferType, currentPage, category, city, debouncedSearch])
 
 
 
@@ -107,12 +134,12 @@ const AnnoncesPage = ({
         </div>
 
         {/* Filters */}
-        <div className={`bg-card rounded-2xl shadow-card p-4 md:p-6 mb-8 gap-4 ${hideOfferTypeFilter ? "grid grid-cols-1 sm:grid-cols-2" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+        <div className={`bg-card rounded-2xl shadow-card p-4 md:p-6 mb-8 gap-4 grid grid-cols-1 sm:grid-cols-2 ${hideOfferTypeFilter ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
           {/* Offer type */}
           {!hideOfferTypeFilter && (
             <select
               value={offerType ?? ""}
-              onChange={(e) => updateFilter("type", e.target.value)}
+              onChange={(e) => updateFilter("offerType", e.target.value)}
               className="w-full py-2.5 px-3 pr-10 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none bg-no-repeat bg-right-4"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`,
@@ -128,6 +155,33 @@ const AnnoncesPage = ({
             </select>
           )}
 
+          {/* City */}
+          <select
+            value={city}
+            onChange={(e) => {
+              const val = e.target.value
+              const params = new URLSearchParams(searchParams?.toString() ?? "")
+              if (val) params.set("city", val)
+              else params.delete("city")
+              params.delete("district") // Reset district when city changes
+              params.delete("page")
+              router.push(`${basePath}?${params.toString()}`)
+            }}
+            className="w-full py-2.5 px-3 pr-10 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 0.75rem center',
+              backgroundSize: '1.5em 1.5em'
+            }}
+            aria-label="Ville"
+          >
+            <option value="">Toutes les villes</option>
+            {cities.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+
           {/* Category */}
           <select
             value={category ?? ""}
@@ -142,27 +196,8 @@ const AnnoncesPage = ({
             aria-label="Catégorie"
           >
             <option value="">Toutes catégories</option>
-            {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
-            ))}
-          </select>
-
-          {/* District */}
-          <select
-            value={district ?? ""}
-            onChange={(e) => updateFilter("district", e.target.value)}
-            className="w-full py-2.5 px-3 pr-10 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 0.75rem center',
-              backgroundSize: '1.5em 1.5em'
-            }}
-            aria-label="Quartier"
-          >
-            <option value="">Tous quartiers</option>
-            {DISTRICTS.map((d) => (
-              <option key={d} value={d}>{d}</option>
+            {dynamicCategories.map(cat => (
+              <option key={cat.id} value={cat.slug}>{cat.name}</option>
             ))}
           </select>
         </div>
