@@ -212,9 +212,20 @@ export async function fetchUsedLocations(offerType?: string): Promise<{ cities: 
  */
 export async function fetchSettings(): Promise<Record<string, string>> {
   const res = await fetch(`${BASE}/api/settings`, {
-    next: { revalidate: 60 }, // Cache pour 1 minute
+    next: { revalidate: 60 },
   } as NextFetchRequestInit)
 
   if (!res.ok) throw new Error("Failed to fetch settings")
+  return res.json()
+}
+
+/**
+ * ADMIN: Récupérer tous les quartiers
+ */
+export async function fetchDistricts(): Promise<any[]> {
+  const res = await fetch(`${BASE}/api/districts`, {
+    next: { revalidate: 60 },
+  } as NextFetchRequestInit)
+  if (!res.ok) throw new Error("Failed to fetch districts")
   return res.json()
 }

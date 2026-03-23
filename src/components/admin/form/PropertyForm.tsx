@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation"
 import { Loader2, X, Plus, Image as ImageIcon, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { 
-  fetchCategories, 
+  fetchCategories,
   fetchPropertyBySlug, 
   createProperty, 
-  updateProperty 
+  updateProperty,
+  fetchDistricts
 } from "@/lib/api"
 import type { Property } from "@/types/property"
 
@@ -38,6 +39,8 @@ export default function PropertyForm({ id }: PropertyFormProps) {
   const [isLoading, setIsLoading] = useState(!!id)
   const [isSaving, setIsSaving] = useState(false)
   const [categories, setCategories] = useState<any[]>([])
+  const [dynamicCities, setDynamicCities] = useState<string[]>([])
+  const [allDistricts, setAllDistricts] = useState<any[]>([])
   
   // Form State
   const [formData, setFormData] = useState<Partial<Property>>({
@@ -65,8 +68,16 @@ export default function PropertyForm({ id }: PropertyFormProps) {
   useEffect(() => {
     async function init() {
       try {
-        const cats = await fetchCategories()
+        const [cats, dists] = await Promise.all([
+          fetchCategories(),
+          fetchDistricts()
+        ])
         setCategories(cats || [])
+        setAllDistricts(dists || [])
+        
+        // Extraire les villes uniques
+        const cities = Array.from(new Set(dists.map((d: any) => d.city))).sort()
+        setDynamicCities(cities)
 
         if (id) {
           const prop = await fetchPropertyBySlug(id)
@@ -387,24 +398,28 @@ export default function PropertyForm({ id }: PropertyFormProps) {
                   className="w-full px-4 py-2.5 rounded-xl border border-input focus:ring-2 focus:ring-[#1A5276] outline-none transition-all"
                   placeholder="Ex: Haie Vive"
                   required
+                  list="districts-list"
                 />
+                <datalist id="districts-list">
+                  {allDistricts
+                    .filter(d => !formData.city || d.city === formData.city)
+                    .map(d => (
+                      <option key={d.id} value={d.name} />
+                    ))
+                  }
+                </datalist>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Ville *</label>
-                <select
-                  value={formData.city || "Cotonou"}
+                <input
+                  type="text"
+                  value={formData.city || ""}
                   onChange={e => handleChange("city", e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-input focus:ring-2 focus:ring-[#1A5276] outline-none transition-all bg-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-input focus:ring-2 focus:ring-[#1A5276] outline-none transition-all"
+                  placeholder="Ex: Cotonou, Parakou..."
                   required
-                >
-                  <option value="Cotonou">Cotonou</option>
-                  <option value="Calavi">Calavi</option>
-                  <option value="Abomey-Calavi">Abomey-Calavi</option>
-                  <option value="Porto-Novo">Porto-Novo</option>
-                  <option value="Ouidah">Ouidah</option>
-                  <option value="Autre">Autre</option>
-                </select>
+                />
               </div>
 
               <div className="space-y-2">

@@ -34,18 +34,18 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4 relative">
-      <Link 
+      <Link
         href="/"
         className="absolute top-6 left-4 md:left-8 text-gray-400 hover:text-white flex items-center gap-2 transition-colors px-3 py-2 rounded-lg hover:bg-white/5"
       >
         <ArrowLeft size={20} />
         <span className="font-medium text-sm">Retourner à l'accueil</span>
       </Link>
-      
+
       <div className="w-full max-w-sm">
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Janice Groupe Immobilier</h1>
+            <h1 className="text-lg font-bold text-white mb-2">Janice Groupe Immobilier</h1>
             <p className="text-gray-400 text-sm">Espace Administrateur</p>
           </div>
 
@@ -89,11 +89,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                loading
+              className={`w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${loading
                   ? "bg-amber-600/50 text-amber-200 cursor-not-allowed"
                   : "bg-amber-500 hover:bg-amber-400 text-gray-900 shadow-lg shadow-amber-500/25 hover:shadow-amber-400/40"
-              }`}
+                }`}
             >
               {loading ? "Connexion..." : "Se connecter"}
             </button>

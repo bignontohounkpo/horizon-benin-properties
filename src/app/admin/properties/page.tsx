@@ -316,9 +316,7 @@ export default function AdminPropertiesPage() {
                   <th className="px-5 py-4 font-medium">Catégorie</th>
                   <th className="px-5 py-4 font-medium">Type</th>
                   <th className="px-5 py-4 font-medium">Prix</th>
-                  <th className="px-5 py-4 font-medium">Statut</th>
                   <th className="px-5 py-4 font-medium text-center">Vedette</th>
-                  <th className="px-5 py-4 font-medium">Date</th>
                   <th className="px-5 py-4 font-medium text-right">Actions</th>
                 </tr>
               </thead>
@@ -366,9 +364,6 @@ export default function AdminPropertiesPage() {
                       {property.price.toLocaleString("fr-FR")} F
                     </td>
                     <td className="px-5 py-4">
-                      {getStatusBadge(property.status)}
-                    </td>
-                    <td className="px-5 py-4">
                       <div className="flex justify-center">
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input 
@@ -380,9 +375,6 @@ export default function AdminPropertiesPage() {
                           <div className="w-9 h-5 bg-muted-foreground/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#F39C12]"></div>
                         </label>
                       </div>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">
-                      {new Date(property.createdAt).toLocaleDateString("fr-FR")}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-2">

@@ -1,25 +1,18 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect } from "react"
 import AnnoncesPage from "./AnnoncesPage"
 
 /** Location page — Annonces page pre-filtered to "louer" */
 const LocationPage = () => {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    // Only redirect if type is not already set to "louer"
-    if (searchParams?.get("type") !== "louer") {
-      const params = new URLSearchParams(searchParams?.toString() ?? "")
-      params.set("type", "louer")
-      router.replace(`/annonces?${params.toString()}`)
-    }
-  }, [searchParams, router])
-
-  // Show the AnnoncesPage directly (filters are in URL)
-  return <AnnoncesPage />
+  return (
+    <AnnoncesPage
+      forcedOfferType="louer"
+      title="Biens à louer"
+      description="Découvrez notre sélection de biens à louer soigneusement vérifiés à Cotonou et au Bénin."
+      hideOfferTypeFilter
+      basePath="/location"
+    />
+  )
 }
 
 export default LocationPage

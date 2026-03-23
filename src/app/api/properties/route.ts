@@ -28,18 +28,35 @@ export async function GET(request: NextRequest) {
       where.status = "active"
     }
 
-    if (offerType) where.offerType = offerType
+    if (offerType && offerType !== "all" && offerType !== "") {
+      where.offerType = offerType
+    }
     if (category) where.category = { slug: category }
     if (district) where.district = { name: district }
-    if (city) where.city = city
+    if (city) {
+      const cityFilter = {
+        OR: [
+          { city: { contains: city, mode: 'insensitive' } },
+          { district: { city: { contains: city, mode: 'insensitive' } } }
+        ]
+      }
+      if (!where.AND) where.AND = []
+      where.AND.push(cityFilter)
+    }
+    
     if (search) {
       const q = search.toLowerCase()
-      where.OR = [
-        { title: { contains: q, mode: 'insensitive' } },
-        { location: { contains: q, mode: 'insensitive' } },
-        { description: { contains: q, mode: 'insensitive' } },
-        { district: { name: { contains: q, mode: 'insensitive' } } }
-      ]
+      const searchFilter = {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { location: { contains: q, mode: 'insensitive' } },
+          { city: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+          { district: { name: { contains: q, mode: 'insensitive' } } }
+        ]
+      }
+      if (!where.AND) where.AND = []
+      where.AND.push(searchFilter)
     }
 
     const total = await prisma.property.count({ where })
@@ -81,11 +98,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { category, district, coordinates, city, ...rest } = body
+    const { 
+      id: _id, 
+      createdAt: _c, 
+      updatedAt: _u, 
+      categoryId: _ci, 
+      districtId: _di, 
+      category, 
+      district, 
+      coordinates, 
+      city, 
+      ...cleanRest 
+    } = body
 
     const p = await prisma.property.create({
       data: {
-        ...rest,
+        ...cleanRest,
         lat: coordinates?.lat,
         lng: coordinates?.lng,
         city: city || "Cotonou",
