@@ -198,12 +198,27 @@ export async function deleteCategory(id: string): Promise<{ success: boolean }> 
 export async function fetchUsedLocations(offerType?: string): Promise<{ cities: string[], districts: { name: string, city: string }[] }> {
   const params = new URLSearchParams()
   if (offerType) params.set("offerType", offerType)
-  
+
   const res = await fetch(`${BASE}/api/properties/used-locations?${params}`, {
     next: { revalidate: 300 },
   } as NextFetchRequestInit)
 
   if (!res.ok) throw new Error("Failed to fetch used locations")
+  return res.json()
+}
+
+/**
+ * Récupérer les catégories utilisées par les propriétés actives
+ */
+export async function fetchUsedCategories(offerType?: string): Promise<Array<{ id: string, name: string, slug: string }>> {
+  const params = new URLSearchParams()
+  if (offerType) params.set("offerType", offerType)
+
+  const res = await fetch(`${BASE}/api/categories/used?${params}`, {
+    next: { revalidate: 300 },
+  } as NextFetchRequestInit)
+
+  if (!res.ok) throw new Error("Failed to fetch used categories")
   return res.json()
 }
 
