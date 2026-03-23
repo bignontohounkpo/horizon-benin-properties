@@ -295,7 +295,7 @@ export default function PropertyForm({ id }: PropertyFormProps) {
                         : "bg-white text-muted-foreground border-input hover:bg-muted"
                     }`}
                   >
-                    🏠 À louer
+                    À louer
                   </button>
                   <button
                     type="button"
@@ -306,7 +306,7 @@ export default function PropertyForm({ id }: PropertyFormProps) {
                         : "bg-white text-muted-foreground border-input hover:bg-muted"
                     }`}
                   >
-                    💰 À vendre
+                    À vendre
                   </button>
                 </div>
               </div>
