@@ -51,8 +51,8 @@ const AnnoncesPage = ({
   // Use forced offer type from props, or from URL, or undefined
   const offerType = forcedOfferType || (searchParams?.get("offerType") as OfferType) || undefined
   const category = (searchParams?.get("category") as PropertyCategory) || undefined
-  const city = searchParams?.get("city") || ""
-  const district = searchParams?.get("district") || ""
+  const city = searchParams?.get("city") || undefined
+  const district = searchParams?.get("district") || undefined
 
   // Districts filtrés par ville sélectionnée
   const filteredDistricts = city
@@ -63,6 +63,11 @@ const AnnoncesPage = ({
     const params = new URLSearchParams(searchParams?.toString() ?? "")
     if (value) params.set(key, value)
     else params.delete(key)
+
+    // Reset district if city changes and it's not compatible
+    if (key === "city") {
+      params.delete("district")
+    }
 
     // Reset to page 1 when filters change
     params.delete("page")
@@ -94,7 +99,7 @@ const AnnoncesPage = ({
         // Extraire les villes uniques (déjà fournies par l'API)
         setCities(locations.cities.sort())
       } catch (err) {
-        console.error("Error loading filters:", err)
+        console.error("Error loading categories or locations:", err)
       }
     }
     loadFilters()
@@ -186,11 +191,10 @@ const AnnoncesPage = ({
               <option key={cat.id} value={cat.slug}>{cat.name}</option>
             ))}
           </select>
-
           {/* City */}
           <Autocomplete
             options={cities}
-            value={city}
+            value={city || ""}
             onChange={(value) => updateFilter("city", value, ["district"])}
             placeholder="Toutes les villes"
             ariaLabel="Ville"
@@ -200,14 +204,13 @@ const AnnoncesPage = ({
           {/* District */}
           <Autocomplete
             options={filteredDistricts.map((d) => d.name)}
-            value={district}
+            value={district || ""}
             onChange={(value) => updateFilter("district", value)}
             placeholder="Tous les quartiers"
             ariaLabel="Quartier"
             noResultsMessage="Aucune annonce disponible pour ce quartier"
           />
         </div>
-
         {/* Results */}
         {loading ? (
           <div className="py-16">
