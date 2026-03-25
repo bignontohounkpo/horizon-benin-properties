@@ -10,17 +10,34 @@ import type { Property } from "@/types/property";
 
 const OpportunitiesPage = () => {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [totalBiens, setTotalBiens] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadProperties() {
       try {
         const all = await fetchProperties();
-        // Filter only terrain properties for sale
-        const terrainOpportunities = all.filter(
-          (property) => property.offerType === "vendre" && property.category === "terrain"
-        );
-        setProperties(terrainOpportunities);
+        setTotalBiens(all.length);
+
+        // Filter featured properties first
+        const featured = all.filter(p => p.isFeatured);
+        
+        // Helper to get 2 properties per category with priority to 'vendre'
+        const get2ByCategory = (cat: string) => {
+          const catFeatured = featured.filter(p => p.category === cat);
+          const forSale = catFeatured.filter(p => p.offerType === "vendre");
+          const forRent = catFeatured.filter(p => p.offerType === "louer");
+          
+          // Combine: forSale first, then forRent, take 2
+          return [...forSale, ...forRent].slice(0, 2);
+        };
+
+        const terrains = get2ByCategory("terrain");
+        const meubles = get2ByCategory("appartement-meuble");
+        const nonMeubles = get2ByCategory("appartement-non-meuble");
+
+        // Mix them
+        setProperties([...terrains, ...meubles, ...nonMeubles]);
       } catch (error) {
         console.error("Error loading opportunities:", error);
       } finally {
@@ -30,42 +47,43 @@ const OpportunitiesPage = () => {
     loadProperties();
   }, []);
 
-  if (loading) {
-    return (
-      <main className="section-padding">
-        <div className="container-custom text-center">
-          <p className="text-muted-foreground text-lg">Chargement...</p>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="section-padding">
       <div className="container-custom">
-        {/* Header */}
+        {/* Header - Alvays visible */}
         <div className="text-center mb-12">
           <h1 className="font-heading font-bold text-3xl md:text-4xl text-foreground mb-3">
             Meilleures opportunités d'investissement
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8">
             Des terrains et projets immobiliers à fort potentiel de rentabilité. Investissements sécurisés sans regret au Bénin.
           </p>
+
+          <Link
+            href="/annonces"
+            className="inline-block bg-accent text-accent-foreground font-semibold px-8 py-3.5 rounded-full hover:opacity-90 transition-opacity"
+          >
+            Rechercher un bien
+          </Link>
         </div>
 
-        {/* Properties Grid */}
-        {properties.length === 0 ? (
+        {/* Dynamic Content */}
+        {loading ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground text-lg italic">Chargement des opportunités...</p>
+          </div>
+        ) : properties.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-muted-foreground text-lg">
-              Aucun terrain disponible pour le moment.
+              Aucune opportunité disponible pour le moment.
             </p>
           </div>
         ) : (
           <>
             <p className="text-sm text-muted-foreground mb-6">
-              {properties.length} terrain{properties.length > 1 ? "s" : ""} disponible{properties.length > 1 ? "s" : ""}
+              {properties.length} opportunité{properties.length > 1 ? "s" : ""} disponible{properties.length > 1 ? "s" : ""}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
               {properties.map((property) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
@@ -78,8 +96,10 @@ const OpportunitiesPage = () => {
                 <p className="text-sm text-muted-foreground">ROI moyen</p>
               </div>
               <div className="bg-card rounded-2xl shadow-card p-4 md:p-6 text-center">
-                <p className="text-2xl md:text-3xl font-bold text-primary mb-1">{properties.length}</p>
-                <p className="text-sm text-muted-foreground">Terrains disponibles</p>
+                <p className="text-2xl md:text-3xl font-bold text-primary mb-1">
+                  {properties.length}
+                </p>
+                <p className="text-sm text-muted-foreground">Biens disponibles</p>
               </div>
               <div className="bg-card rounded-2xl shadow-card p-4 md:p-6 text-center">
                 <p className="text-2xl md:text-3xl font-bold text-primary mb-1">24h</p>

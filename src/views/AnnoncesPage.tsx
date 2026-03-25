@@ -195,7 +195,7 @@ const AnnoncesPage = ({
           <Autocomplete
             options={cities}
             value={city || ""}
-            onChange={(value) => updateFilter("city", value, ["district"])}
+            onChange={(value: string) => updateFilter("city", value, ["district"])}
             placeholder="Toutes les villes"
             ariaLabel="Ville"
             noResultsMessage="Aucune annonce disponible pour cette ville"
@@ -205,7 +205,7 @@ const AnnoncesPage = ({
           <Autocomplete
             options={filteredDistricts.map((d) => d.name)}
             value={district || ""}
-            onChange={(value) => updateFilter("district", value)}
+            onChange={(value: string) => updateFilter("district", value)}
             placeholder="Tous les quartiers"
             ariaLabel="Quartier"
             noResultsMessage="Aucune annonce disponible pour ce quartier"
