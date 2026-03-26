@@ -12,7 +12,7 @@ import {
   fetchCities,
   searchDistricts,
 } from "@/lib/api";
-import type { Property } from "@/types/property";
+import type { Property, PropertyCategory } from "@/types/property";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { AutocompleteAsync } from "@/components/ui/autocomplete-async";
 import { FileDropzone } from "./FileDropzone";
