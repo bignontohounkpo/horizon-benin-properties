@@ -45,7 +45,7 @@ const Navbar = () => {
             <img
               src="/logo.webp"
               alt={agency.NAME}
-              className="h-20 w-20"
+              className="h-16 md:h-20 w-auto object-contain"
             />
             <span className="sr-only">{agency.NAME}</span>
           </Link>
